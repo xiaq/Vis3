@@ -33,9 +33,9 @@ d3.keys(outFields).forEach(function(f) { allFields[f] = outFields[f]; });
 var dispatch = d3.dispatch(
     'load',
     'xswitch', 'xfilter', 'yswitch',
-    'algclick', 'algmouseover', 'algmouseout', 'algclear');
+    'algchange', 'algmouseover', 'algmouseout', 'algclear');
 
-var theData, theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges', theOtherIn = 't', theOtherInValue;
+var theData, theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges', theOtherIn = 't', theOtherInValue, theAlgorithms = d3.set();
 
 d3.csv("data.csv", function(error, data) {
   data.forEach(function(d) {
@@ -75,10 +75,14 @@ d3.csv("data.csv", function(error, data) {
     .enter().append('g')
       .attr('transform', trans)
       .on('click', function(d) {
-        console.log('alg', d);
-        console.log(d3.select(this, 'rect'));
-        d3.select(this).select('rect').attr('fill', 'black');
-        dispatch.algclick(d);
+        if (theAlgorithms.has(d)) {
+          d3.select(this).select('rect').attr('fill', 'white');
+          theAlgorithms.remove(d);
+        } else {
+          d3.select(this).select('rect').attr('fill', 'black');
+          theAlgorithms.add(d);
+        }
+        dispatch.algchange();
       })
       .on('mouseover', dispatch.algmouseover)
       .on('mouseout', dispatch.algmouseout);
@@ -107,7 +111,6 @@ d3.csv("data.csv", function(error, data) {
   var clear = svg.append('g')
     .attr('transform', trans)
     .on('click', dispatch.algclear)
-    .append('text').text('(Clear)');
 })();
 
 // y switcher
@@ -202,9 +205,16 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('xswitch.linechart', update);
   dispatch.on('yswitch.linechart', update);
 
-  dispatch.on('algclick.linechart', function(alg) {
+  dispatch.on('algchange.linechart', function(alg) {
     var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
-    var algData = data.filter(function(d) { return d.algorithm == alg; });
+    var algData;
+    if (theAlgorithms.empty() || theAlgorithms.size() == d3.keys(algorithms).length) {
+      algData = data;
+    } else {
+      var algData = data.filter(function(d) {
+        return theAlgorithms.has(d.algorithm);
+      });
+    }
 
     x.domain(d3.extent(algData, attrgetter(theXField)));
     y.domain(d3.extent(algData, attrgetter(theYField)));
