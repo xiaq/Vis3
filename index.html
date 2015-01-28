@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <style>
   body {
-    font: 10px sans-serif;
+    font: 13px sans-serif;
   }
 
   .axis path,
@@ -19,13 +19,29 @@
     stroke-width: 1px;
   }
 
+  .line.emphasized {
+    stroke-width: 2px;
+  }
+
   #legend, #line-chart {
     float: left;
+  }
+
+  #x-switcher {
+    float: right;
+  }
+
+  .clear {
+    clear: both;
   }
   </style>
 </head>
 <body>
-  <div id="line-chart"></div>
+  <div id="scatter-plot"></div>
+  <div id="line-chart">
+    <div class="clear"></div>
+    <div id="x-switcher"></div>
+  </div>
   <div id="legend"></div>
   <script src="d3.v3.js"></script>
   <script src="vis.js"></script>
