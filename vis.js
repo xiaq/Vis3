@@ -104,6 +104,10 @@ function fieldsfmt(d, x, y, x2) {
   return html;
 }
 
+function second(n) {
+  return Math.round(n) + 's';
+}
+
 // Legend
 (function() {
   var margin = {top: 20, right: 10, bottom: 15, left: 25},
@@ -439,15 +443,19 @@ function fieldsfmt(d, x, y, x2) {
   function update() {
     var data = theData;
     var algs = theAlgorithms.empty() ? algorithms : theAlgorithms.values();
+    var ttotal = 0;
     var pieData = algs.map(function(alg) {
       var t = 0;
       data.forEach(function(d) {
         if (d.algorithm == alg) {
           t += d.runningTime;
+          ttotal += d.runningTime;
         }
       });
       return {"algorithm": alg, "runningTime": t, "color": algorithmColor[alg]};
     });
+
+    d3.select('#total-time').text(second(ttotal));
 
     svg.selectAll('.arc').remove();
 
@@ -464,7 +472,7 @@ function fieldsfmt(d, x, y, x2) {
         .attr('dy', '.35em')
         .style('text-anchor', 'middle')
         .text(function(d) {
-          return d.endAngle - d.startAngle > 0.5 ? Math.round(d.value) + 's' : '';
+          return d.endAngle - d.startAngle > 0.5 ? second(d.value) : '';
         });
   }
 
