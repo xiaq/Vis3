@@ -375,7 +375,7 @@ d3.csv("data.csv", function(error, data) {
       .sort(null)
       .value(attrgetter('runningTime'));
 
-  var svg = d3.select("body").append("svg")
+  var svg = d3.select("#pie-chart").append("svg")
       .attr("width", width)
       .attr("height", height)
     .append("g")
