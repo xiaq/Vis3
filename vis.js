@@ -34,11 +34,11 @@ d3.keys(outFields).forEach(function(f) { allFields[f] = outFields[f]; });
 
 var dispatch = d3.dispatch(
     'load',
-    'xswitch', 'xfilter', 'yswitch',
+    'xswitch', 'xfilter', 'yswitch', 'sxswitch',
     'algchange', 'algmouseover', 'algmouseout');
 
 var theWholeData, theData, theAlgData;
-var theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges';
+var theXField = 'nvertices', theSXField = 'nedges', theYField = 'nedges';
 var theOtherIn = 't', theOtherInValue;
 var theAlgorithms = d3.set();
 
@@ -166,6 +166,19 @@ d3.csv("data.csv", function(error, data) {
 
   dispatch.on('load.xswitcher', update);
   dispatch.on('xswitch.xswitcher', update);
+})();
+
+// sx switcher
+(function() {
+  d3.select('#sx-switcher')
+    .append('select')
+      .on('change', function() {
+        theSXField = this.value;
+        dispatch.sxswitch();
+      })
+    .selectAll('option').data(d3.keys(outFields)).enter().append('option')
+      .attr('value', id)
+      .text(function(d) { console.log(d); return outFields[d]; });
 })();
 
 // Line chart
@@ -316,24 +329,30 @@ d3.csv("data.csv", function(error, data) {
       .style("text-anchor", "end");
 
   function update() {
-    var data = theData;
-    x.domain(d3.extent(data, attrgetter(theSXField)));
-    y.domain(d3.extent(data, attrgetter(theYField)));
+    x.domain(d3.extent(theAlgData, attrgetter(theSXField)));
+    y.domain(d3.extent(theAlgData, attrgetter(theYField)));
 
     $x.call(xAxis);
     $y.call(yAxis);
     $xLabel.text(outFields[theSXField]);
     $yLabel.text(outFields[theYField]);
 
-    svg.selectAll('.dot').data(data)
+    svg.selectAll('.dot').remove();
+
+    svg.selectAll('.dot').data(theData)
       .enter().append('circle')
-      .attr('class', 'dot').attr('r', 2)
-      .attr('cx', function(d) { return x(d[theSXField]); })
-      .attr('cy', function(d) { return y(d[theYField]); })
-      .style('fill', function (d) { return algorithmColor[d.algorithm]; });
+        .attr('class', 'dot').attr('r', 2)
+        .attr('cx', function(d) { return x(d[theSXField]); })
+        .attr('cy', function(d) { return y(d[theYField]); })
+        .style('fill', function (d) { return algorithmColor[d.algorithm]; });
   }
 
   dispatch.on('load.scatterplot', update);
+  dispatch.on('yswitch.scatterplot', update);
+  dispatch.on('xswitch.scatterplot', update);
+  dispatch.on('sxswitch.scatterplot', update);
+  dispatch.on('xfilter.scatterplot', update);
+  dispatch.on('algchange.scatterplot', update);
 })();
 
 // Pie chart
@@ -361,7 +380,9 @@ d3.csv("data.csv", function(error, data) {
 
   function update() {
     var data = theData;
-    var pieData = algorithms.map(function(alg) {
+    var algs = theAlgorithms.empty() ? algorithms : theAlgorithms.values();
+    console.log('update pie chart', algs);
+    var pieData = algs.map(function(alg) {
       var t = 0;
       data.forEach(function(d) {
         if (d.algorithm == alg) {
@@ -370,6 +391,8 @@ d3.csv("data.csv", function(error, data) {
       });
       return {"algorithm": alg, "runningTime": t, "color": algorithmColor[alg]};
     });
+
+    svg.selectAll('.arc').remove();
 
     var g = svg.selectAll('.arc')
         .data(pie(pieData))
@@ -384,6 +407,7 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('load.piechart', update);
   dispatch.on('xswitch.piechart', update);
   dispatch.on('xfilter.piechart', update);
+  dispatch.on('algchange.piechart', update);
 })();
 
 // vi: se sw=2 ts=2 sts=2:

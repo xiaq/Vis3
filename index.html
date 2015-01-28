@@ -23,11 +23,11 @@
     stroke-width: 2px;
   }
 
-  #legend-container, #line-chart-container, #line-chart, #scatter-plot {
+  #legend-container, #line-chart-container, #line-chart, #scatter-plot-container {
     float: left;
   }
 
-  #x-switcher {
+  #x-switcher, #sx-switcher {
     float: right;
   }
 
@@ -45,7 +45,10 @@
   </style>
 </head>
 <body>
-  <div id="scatter-plot"></div>
+  <div id="scatter-plot-container">
+    <div id="scatter-plot"></div>
+    <div id="sx-switcher"></div>
+  </div>
   <div id="line-chart-container">
     <div id="y-switcher"></div>
     <div class="clear"></div>
