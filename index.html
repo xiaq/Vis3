@@ -23,12 +23,20 @@
     stroke-width: 2px;
   }
 
-  #legend, #line-chart, #scatter-plot {
+  #legend-container, #line-chart-container, #line-chart, #scatter-plot {
     float: left;
   }
 
   #x-switcher {
     float: right;
+  }
+
+  #y-switcher {
+    height: 30px;
+  }
+
+  #scatter-plot {
+    margin-top: 30px;
   }
 
   .clear {
@@ -38,11 +46,17 @@
 </head>
 <body>
   <div id="scatter-plot"></div>
-  <div id="line-chart">
+  <div id="line-chart-container">
+    <div id="y-switcher"></div>
+    <div class="clear"></div>
+    <div id="line-chart"></div>
     <div class="clear"></div>
     <div id="x-switcher"></div>
   </div>
-  <div id="legend"></div>
+  <div id="legend-container">
+    <div id="legend"></div>
+    <div id="pie-chart"></div>
+  </div>
   <script src="d3.v3.js"></script>
   <script src="vis.js"></script>
 </body>

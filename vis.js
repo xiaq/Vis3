@@ -8,7 +8,8 @@ var algorithms = {
 };
 
 var inFields = {
-  'nvertices': '#Vertices', 'algorithm': 'Algorithm', 't': 'Required dilation'
+  'nvertices': '#Vertices', 't': 'Required dilation',
+  // 'algorithm': 'Algorithm',
 }
 
 var inValues = {"nvertices": d3.set(), 't': d3.set()};
@@ -18,25 +19,27 @@ function otherInField(f) {
 }
 
 var outFields = {
-  'treal': 'Actual dilation',
   'nedges': '#Edges', 'weight': 'Weight', 
+  'treal': 'Actual dilation',
   'maxDegree': 'Max degree',
-  'diameter': 'Diameter', 'nintersections': '#Intersections',
+  // 'diameter': 'Diameter', 'nintersections': '#Intersections',
   'runningTime': 'Running time'
 };
 
+var allFields = {};
+d3.keys(inFields).forEach(function(f) { allFields[f] = inFields[f]; });
+d3.keys(outFields).forEach(function(f) { allFields[f] = outFields[f]; });
+
 var dispatch = d3.dispatch(
     'load',
-    'xswitch', 'xfilter',
+    'xswitch', 'xfilter', 'yswitch',
     'algclick', 'algmouseover', 'algmouseout', 'algclear');
 
 var theData, theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges', theOtherIn = 't', theOtherInValue;
 
 d3.csv("data.csv", function(error, data) {
   data.forEach(function(d) {
-    d.t = +d.t;
-    d.nvertices = +d.nvertices;
-    d.nedges = +d.nedges;
+    d3.keys(allFields).forEach(function(k) { d[k] = +d[k]; });
     inValues.t.add(d.t);
     inValues.nvertices.add(d.nvertices);
   });
@@ -71,9 +74,24 @@ d3.csv("data.csv", function(error, data) {
       .data(d3.keys(algorithms))
     .enter().append('g')
       .attr('transform', trans)
-      .on('click', dispatch.algclick)
+      .on('click', function(d) {
+        console.log('alg', d);
+        console.log(d3.select(this, 'rect'));
+        d3.select(this).select('rect').attr('fill', 'black');
+        dispatch.algclick(d);
+      })
       .on('mouseover', dispatch.algmouseover)
       .on('mouseout', dispatch.algmouseout);
+
+  gs.append('rect')
+      .attr('width', 10)
+      .attr('height', 10)
+      .attr('y', -9)
+      .attr('x', -12)
+      .attr('fill', 'white')
+      .attr('stroke', 'black')
+      .attr('stroke-width', '1px');
+      //.on('click', function(d) { console.log("rect click", d); });
 
   gs.append('text').text(id);
 
@@ -90,6 +108,14 @@ d3.csv("data.csv", function(error, data) {
     .attr('transform', trans)
     .on('click', dispatch.algclear)
     .append('text').text('(Clear)');
+})();
+
+// y switcher
+(function() {
+  d3.select('#y-switcher').append('select').on('change', function() {
+      var v = this.value; theYField = v; dispatch.yswitch(v); })
+    .selectAll('option').data(d3.keys(outFields)).enter().append('option')
+    .attr('value', id).text(function (d) { return outFields[d]; });
 })();
 
 // x switcher
@@ -141,7 +167,7 @@ d3.csv("data.csv", function(error, data) {
         .x(function(d) { return x(d[theXField]); })
         .y(function(d) { return y(d[theYField]); });
 
-  var svg = d3.select("#line-chart").insert("svg", ':first-child')
+  var svg = d3.select("#line-chart").append("svg")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
     .append("g")
@@ -173,7 +199,8 @@ d3.csv("data.csv", function(error, data) {
 
   dispatch.on('load.linechart', update);
   dispatch.on('xfilter.linechart', update);
-  dispatch.on('xswitch.linechart', update)
+  dispatch.on('xswitch.linechart', update);
+  dispatch.on('yswitch.linechart', update);
 
   dispatch.on('algclick.linechart', function(alg) {
     var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
@@ -238,8 +265,8 @@ d3.csv("data.csv", function(error, data) {
 
 // Scatter plot
 (function() {
-  var margin = {top: 20, right: 10, bottom: 20, left: 70},
-      width = 360 - margin.left - margin.right,
+  var margin = {top: 20, right: 20, bottom: 20, left: 70},
+      width = 420 - margin.left - margin.right,
       height = 420 - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
@@ -298,6 +325,56 @@ d3.csv("data.csv", function(error, data) {
   }
 
   dispatch.on('load.scatterplot', update);
+})();
+
+// Pie chart
+(function() {
+  var width = 200,
+      height = 200,
+      radius = Math.min(width, height) / 2;
+
+  var color = d3.scale.ordinal()
+      .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
+
+  var arc = d3.svg.arc()
+      .outerRadius(radius - 10)
+      .innerRadius(0);
+
+  var pie = d3.layout.pie()
+      .sort(null)
+      .value(attrgetter('runningTime'));
+
+  var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+    .append("g")
+      .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+  function update() {
+    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    var pieData = d3.keys(algorithms).map(function(alg) {
+      var t = 0;
+      data.forEach(function(d) {
+        if (d.algorithm == alg) {
+          t += d.runningTime;
+        }
+      });
+      return {"algorithm": alg, "runningTime": t, "color": algorithms[alg]};
+    });
+
+    var g = svg.selectAll('.arc')
+        .data(pie(pieData))
+      .enter().append('g')
+        .attr('class', 'arc');
+
+    g.append('path')
+        .attr('d', arc)
+        .style('fill', function(d) { return d.data.color; });
+  }
+
+  dispatch.on('load.piechart', update);
+  dispatch.on('xswitch.piechart', update);
+  dispatch.on('xfilter.piechart', update);
 })();
 
 // vi: se sw=2 ts=2 sts=2:

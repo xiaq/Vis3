@@ -1,4 +1,4 @@
-graph,nvertices,algorithm,t,tReal,nedges,weight,maxDegree,diameter,nintersections,runningTime
+graph,nvertices,algorithm,t,treal,nedges,weight,maxDegree,diameter,nintersections,runningTime
 Data challenge 2,2689,Greedy Theta,1.1,1.124954649,3038,4491.812646,10,0,0,47.45607168
 Data challenge 2,2689,Greedy Theta,1.2,1.21906635,2970,3332.611401,7,0,0,38.59809666
 Data challenge 2,2689,Greedy Theta,1.3,1.341640786,2947,3185.029687,6,0,0,32.00262302
