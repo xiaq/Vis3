@@ -37,7 +37,14 @@ var dispatch = d3.dispatch(
     'xswitch', 'xfilter', 'yswitch',
     'algchange', 'algmouseover', 'algmouseout', 'algclear');
 
-var theData, theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges', theOtherIn = 't', theOtherInValue, theAlgorithms = d3.set();
+var theWholeData, theData;
+var theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges';
+var theOtherIn = 't', theOtherInValue;
+var theAlgorithms = d3.set();
+
+function updateTheData() {
+  theData = theWholeData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+}
 
 d3.csv("data.csv", function(error, data) {
   data.forEach(function(d) {
@@ -45,11 +52,12 @@ d3.csv("data.csv", function(error, data) {
     inValues.t.add(d.t);
     inValues.nvertices.add(d.nvertices);
   });
-  theData = data;
+  theWholeData = data;
   inValues.t = inValues.t.values().sort(numcmp);
   inValues.nvertices = inValues.nvertices.values().sort(numcmp);
   theOtherInValue = inValues[theOtherIn][0];
-  dispatch.load(data);
+  updateTheData();
+  dispatch.load();
 });
 
 // Legend
@@ -134,12 +142,14 @@ d3.csv("data.csv", function(error, data) {
       theXField = xname;
       theOtherIn = otherInField(xname);
       theOtherInValue = inValues[theOtherIn][0];
+      updateTheData();
       dispatch.xswitch(xname);
     });
     switcher.append('span').text(inFields[xname] + ' =');
     var options = d3.set(theData.map(attrgetter(xname))).values().sort(numcmp);
     switcher.append('select').on('change', function() {
-        var v = this.value; theOtherInValue = v; dispatch.xfilter(v); })
+        var v = this.value; theOtherInValue = v; updateTheData();
+        dispatch.xfilter(v); })
       .selectAll('option').data(options).enter().append('option')
       .attr('value', id).text(id);
   }
@@ -208,7 +218,7 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('yswitch.linechart', update);
 
   dispatch.on('algchange.linechart', function(alg) {
-    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    var data = theData;
     var algData;
     if (theAlgorithms.empty() || theAlgorithms.size() == algorithms.length) {
       algData = data;
@@ -235,7 +245,7 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('algclear.linechart', update);
 
   function update() {
-    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    var data = theData;
 
     x.domain(d3.extent(data, attrgetter(theXField)));
     y.domain(d3.extent(data, attrgetter(theYField)));
@@ -319,7 +329,7 @@ d3.csv("data.csv", function(error, data) {
       .style("text-anchor", "end");
 
   function update() {
-    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    var data = theData;
     x.domain(d3.extent(data, attrgetter(theSXField)));
     y.domain(d3.extent(data, attrgetter(theYField)));
 
@@ -363,7 +373,7 @@ d3.csv("data.csv", function(error, data) {
       .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
   function update() {
-    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    var data = theData;
     var pieData = algorithms.map(function(alg) {
       var t = 0;
       data.forEach(function(d) {
