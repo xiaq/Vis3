@@ -72,6 +72,38 @@ d3.csv("data.csv", function(error, data) {
   dispatch.load();
 });
 
+var $tooltip = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+var tooltipDuration = 200, tooltipOpacity = 0.9;
+var tooltipXOff = 5, tooltipYOff = -28;
+
+function showTooltip(html) {
+  $tooltip.transition()
+      .duration(tooltipDuration)
+      .style('opacity', tooltipOpacity);
+  $tooltip.html(html)
+      .style('left', d3.event.pageX + tooltipXOff + 'px')
+      .style('top', d3.event.pageY + tooltipYOff + 'px')
+}
+
+function hideTooltip() {
+  $tooltip.transition()
+      .duration(tooltipDuration)
+      .style('opacity', 0);
+}
+
+function fieldfmt(d, f) {
+  return allFields[f] + ' = ' + d[f];
+}
+
+function fieldsfmt(d, x, y, x2) {
+  var html = '<b>' + d.algorithm + '</b><br/>' +
+    fieldfmt(d, x) + '<br/>' + fieldfmt(d, y);
+  if (x2 != x && x2 != y) {
+    html += '<br/>(' + fieldfmt(d, x2) + ')';
+  }
+  return html;
+}
+
 // Legend
 (function() {
   var margin = {top: 20, right: 10, bottom: 15, left: 25},
@@ -91,6 +123,8 @@ d3.csv("data.csv", function(error, data) {
     gy += gh;
     return r;
   }
+
+  var algs;
 
   var gs = svg.selectAll('g')
       .data(algorithms)
@@ -130,6 +164,20 @@ d3.csv("data.csv", function(error, data) {
     .attr('y1', lineMargin)
     .attr('x2', lineLength)
     .attr('y2', lineMargin);
+
+  function updateDisabled() {
+    algs = d3.set();
+    theData.forEach(function(d) {
+      algs.add(d.algorithm);
+    });
+    gs.style('opacity', function(d) {
+      return algs.has(d) ? 1 : 0.3;
+    });
+  }
+
+  dispatch.on('load.legend', updateDisabled);
+  dispatch.on('xswitch.legend', updateDisabled);
+  dispatch.on('xfilter.legend', updateDisabled);
 })();
 
 // y switcher
@@ -181,7 +229,7 @@ d3.csv("data.csv", function(error, data) {
       })
     .selectAll('option').data(d3.keys(outFields)).enter().append('option')
       .attr('value', id)
-      .text(function(d) { console.log(d); return outFields[d]; });
+      .text(function(d) { return outFields[d]; });
 })();
 
 // Line chart
@@ -282,7 +330,11 @@ d3.csv("data.csv", function(error, data) {
         .attr('class', 'dot').attr('r', 2)
         .attr('cx', function(d) { return x(d[theXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
-        .style('fill', function (d) { return algorithmColor[d.algorithm]; });
+        .style('fill', function (d) { return algorithmColor[d.algorithm]; })
+        .on('mouseover', function(d) {
+          showTooltip(fieldsfmt(d, theXField, theYField, theSXField));
+        })
+        .on('mouseout', hideTooltip);
     }, firstDraw ? 0 : drawDuration);
     firstDraw = false;
   }
@@ -347,7 +399,11 @@ d3.csv("data.csv", function(error, data) {
         .attr('class', 'dot').attr('r', 2)
         .attr('cx', function(d) { return x(d[theSXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
-        .style('fill', function (d) { return algorithmColor[d.algorithm]; });
+        .style('fill', function (d) { return algorithmColor[d.algorithm]; })
+        .on('mouseover', function(d) {
+          showTooltip(fieldsfmt(d, theSXField, theYField, theXField));
+        })
+        .on('mouseout', hideTooltip);
   }
 
   dispatch.on('load.scatterplot', update);
@@ -384,7 +440,6 @@ d3.csv("data.csv", function(error, data) {
   function update() {
     var data = theData;
     var algs = theAlgorithms.empty() ? algorithms : theAlgorithms.values();
-    console.log('update pie chart', algs);
     var pieData = algs.map(function(alg) {
       var t = 0;
       data.forEach(function(d) {
