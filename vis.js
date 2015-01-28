@@ -146,15 +146,8 @@ d3.csv("data.csv", function(error, data) {
     var xname = otherInField(theXField);
     d3.select('#x-switcher').selectAll('div').remove();
     var switcher = d3.select('#x-switcher').append('div');
-    switcher.append('span').text(inFields[theXField]);
-    switcher.append('button').text('⇔').on('click', function() {
-      theXField = xname;
-      theOtherIn = otherInField(xname);
-      theOtherInValue = inValues[theOtherIn][0];
-      updateTheData();
-      dispatch.xswitch(xname);
-    });
-    switcher.append('span').text(inFields[xname] + ' =');
+
+    switcher.append('span').text('(filter: ' + inFields[xname] + ' =');
     var data = theWholeData;
     var options = d3.set(data.map(attrgetter(xname))).values().sort(numcmp);
     switcher.append('select').on('change', function() {
@@ -162,6 +155,16 @@ d3.csv("data.csv", function(error, data) {
         dispatch.xfilter(v); })
       .selectAll('option').data(options).enter().append('option')
       .attr('value', id).text(id);
+    switcher.append('span').text(')');
+
+    switcher.append('button').text('⇔').on('click', function() {
+      theXField = xname;
+      theOtherIn = otherInField(xname);
+      theOtherInValue = inValues[theOtherIn][0];
+      updateTheData();
+      dispatch.xswitch(xname);
+    });
+    switcher.append('span').text(inFields[theXField]);
   }
 
   dispatch.on('load.xswitcher', update);
@@ -216,11 +219,11 @@ d3.csv("data.csv", function(error, data) {
   $x = svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")");
-  $xLabel = $x.append('text')
+  /*$xLabel = $x.append('text')
       .attr('x', width)
       .attr('dy', '-1em')
       .attr('dx', '-0.2em')
-      .style('text-anchor', 'end');
+      .style('text-anchor', 'end');*/
   $y = svg.append("g")
       .attr("class", "y axis");
   $yLabel = $y.append("text")
@@ -259,7 +262,7 @@ d3.csv("data.csv", function(error, data) {
     $x.call(xAxis);
     $y.call(yAxis);
 
-    $xLabel.text(inFields[theXField]);
+    //$xLabel.text(inFields[theXField]);
     $yLabel.text(outFields[theYField]);
 
     svg.selectAll('.dot').remove();
@@ -315,11 +318,11 @@ d3.csv("data.csv", function(error, data) {
   $x = svg.append("g")
       .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")");
-  $xLabel = $x.append('text')
+  /*$xLabel = $x.append('text')
       .attr('x', width)
       .attr('dy', '-1em')
       .attr('dx', '-0.2em')
-      .style('text-anchor', 'end');
+      .style('text-anchor', 'end');*/
   $y = svg.append("g")
       .attr("class", "y axis");
   $yLabel = $y.append("text")
@@ -334,7 +337,7 @@ d3.csv("data.csv", function(error, data) {
 
     $x.call(xAxis);
     $y.call(yAxis);
-    $xLabel.text(outFields[theSXField]);
+    //$xLabel.text(outFields[theSXField]);
     $yLabel.text(outFields[theYField]);
 
     svg.selectAll('.dot').remove();
