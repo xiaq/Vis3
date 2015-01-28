@@ -152,7 +152,6 @@ function fieldsfmt(d, x, y, x2) {
       .attr('fill', 'white')
       .attr('stroke', 'black')
       .attr('stroke-width', '1px');
-      //.on('click', function(d) { console.log("rect click", d); });
 
   gs.append('text').text(id);
 
@@ -171,7 +170,7 @@ function fieldsfmt(d, x, y, x2) {
       algs.add(d.algorithm);
     });
     gs.style('opacity', function(d) {
-      return algs.has(d) ? 1 : 0.3;
+      return algs.has(d) ? '1' : '0.2';
     });
   }
 
