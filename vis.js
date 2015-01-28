@@ -44,6 +44,7 @@ var theAlgorithms = d3.set();
 
 function updateTheData() {
   theData = theWholeData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+  updateTheAlgData();
 }
 
 function updateTheAlgData() {
@@ -154,7 +155,8 @@ d3.csv("data.csv", function(error, data) {
       dispatch.xswitch(xname);
     });
     switcher.append('span').text(inFields[xname] + ' =');
-    var options = d3.set(theData.map(attrgetter(xname))).values().sort(numcmp);
+    var data = theWholeData;
+    var options = d3.set(data.map(attrgetter(xname))).values().sort(numcmp);
     switcher.append('select').on('change', function() {
         var v = this.value; theOtherInValue = v; updateTheData();
         dispatch.xfilter(v); })
