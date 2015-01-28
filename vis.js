@@ -2,10 +2,12 @@ function id(x) { return x; }
 function attrgetter(attr) { return function(d) { return d[attr]; }; }
 function numcmp(a, b) { return a - b; }
 
-var algorithms = {
+var algorithmColor = {
   "Greedy Theta": "brown", "Greedy": "blue",
   "Theta": "purple", "Yao": "green", "WSPD": "red"
 };
+
+var algorithms = d3.keys(algorithmColor);
 
 var inFields = {
   'nvertices': '#Vertices', 't': 'Required dilation',
@@ -71,7 +73,7 @@ d3.csv("data.csv", function(error, data) {
   }
 
   var gs = svg.selectAll('g')
-      .data(d3.keys(algorithms))
+      .data(algorithms)
     .enter().append('g')
       .attr('transform', trans)
       .on('click', function(d) {
@@ -101,7 +103,7 @@ d3.csv("data.csv", function(error, data) {
 
   gs.append('line')
     .attr('stroke-width', lineWidth)
-    .attr('stroke', function(d) { return algorithms[d]; })
+    .attr('stroke', function(d) { return algorithmColor[d]; })
     .attr('fill', 'none')
     .attr('x1', 0)
     .attr('y1', lineMargin)
@@ -194,10 +196,10 @@ d3.csv("data.csv", function(error, data) {
       .attr("dy", ".71em")
       .style("text-anchor", "end");
 
-  d3.keys(algorithms).forEach(function(alg) {
+  algorithms.forEach(function(alg) {
     $paths[alg] = svg.append("path")
         .attr("class", "line")
-        .attr('style', 'stroke: ' + algorithms[alg]);
+        .attr('style', 'stroke: ' + algorithmColor[alg]);
   });
 
   dispatch.on('load.linechart', update);
@@ -208,7 +210,7 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('algchange.linechart', function(alg) {
     var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
     var algData;
-    if (theAlgorithms.empty() || theAlgorithms.size() == d3.keys(algorithms).length) {
+    if (theAlgorithms.empty() || theAlgorithms.size() == algorithms.length) {
       algData = data;
     } else {
       var algData = data.filter(function(d) {
@@ -252,7 +254,7 @@ d3.csv("data.csv", function(error, data) {
 
     svg.selectAll('.dot').remove();
 
-    d3.keys(algorithms).forEach(function(alg) {
+    algorithms.forEach(function(alg) {
       var datum = data.filter(function(d) { return d.algorithm == alg; });
       $paths[alg]
           .datum(datum)
@@ -267,7 +269,7 @@ d3.csv("data.csv", function(error, data) {
         .attr('class', 'dot').attr('r', 2)
         .attr('cx', function(d) { return x(d[theXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
-        .style('fill', function (d) { return algorithms[d.algorithm]; });
+        .style('fill', function (d) { return algorithmColor[d.algorithm]; });
     }, firstDraw ? 0 : drawDuration);
     firstDraw = false;
   }
@@ -331,7 +333,7 @@ d3.csv("data.csv", function(error, data) {
       .attr('class', 'dot').attr('r', 2)
       .attr('cx', function(d) { return x(d[theSXField]); })
       .attr('cy', function(d) { return y(d[theYField]); })
-      .style('fill', function (d) { return algorithms[d.algorithm]; });
+      .style('fill', function (d) { return algorithmColor[d.algorithm]; });
   }
 
   dispatch.on('load.scatterplot', update);
@@ -362,14 +364,14 @@ d3.csv("data.csv", function(error, data) {
 
   function update() {
     var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
-    var pieData = d3.keys(algorithms).map(function(alg) {
+    var pieData = algorithms.map(function(alg) {
       var t = 0;
       data.forEach(function(d) {
         if (d.algorithm == alg) {
           t += d.runningTime;
         }
       });
-      return {"algorithm": alg, "runningTime": t, "color": algorithms[alg]};
+      return {"algorithm": alg, "runningTime": t, "color": algorithmColor[alg]};
     });
 
     var g = svg.selectAll('.arc')
