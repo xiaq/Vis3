@@ -120,7 +120,7 @@ d3.csv("data.csv", function(error, data) {
 // Line chart
 (function() {
   var margin = {top: 20, right: 10, bottom: 20, left: 70},
-      width = 640 - margin.left - margin.right,
+      width = 520 - margin.left - margin.right,
       height = 420 - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
@@ -149,32 +149,29 @@ d3.csv("data.csv", function(error, data) {
 
   var $x, $xLabel, $y, $yLabel, $paths = {};
 
-  dispatch.on('load.linechart', function(data) {
-    $x = svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")");
-    $xLabel = $x.append('text')
-        .attr('x', width)
-        .attr('dy', '-1em')
-        .attr('dx', '-0.2em')
-        .style('text-anchor', 'end');
+  $x = svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")");
+  $xLabel = $x.append('text')
+      .attr('x', width)
+      .attr('dy', '-1em')
+      .attr('dx', '-0.2em')
+      .style('text-anchor', 'end');
+  $y = svg.append("g")
+      .attr("class", "y axis");
+  $yLabel = $y.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end");
 
-    $y = svg.append("g")
-        .attr("class", "y axis");
-    $yLabel = $y.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end");
-
-    d3.keys(algorithms).forEach(function(alg) {
-      $paths[alg] = svg.append("path")
-          .attr("class", "line")
-          .attr('style', 'stroke: ' + algorithms[alg]);
-    });
-    update();
+  d3.keys(algorithms).forEach(function(alg) {
+    $paths[alg] = svg.append("path")
+        .attr("class", "line")
+        .attr('style', 'stroke: ' + algorithms[alg]);
   });
 
+  dispatch.on('load.linechart', update);
   dispatch.on('xfilter.linechart', update);
   dispatch.on('xswitch.linechart', update)
 
@@ -237,6 +234,70 @@ d3.csv("data.csv", function(error, data) {
     }, firstDraw ? 0 : drawDuration);
     firstDraw = false;
   }
+})();
+
+// Scatter plot
+(function() {
+  var margin = {top: 20, right: 10, bottom: 20, left: 70},
+      width = 360 - margin.left - margin.right,
+      height = 420 - margin.top - margin.bottom;
+
+  var x = d3.scale.linear()
+      .range([0, width]);
+
+  var y = d3.scale.linear()
+      .range([height, 0]);
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left");
+
+  var svg = d3.select("#scatter-plot").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  var $x, $xLabel, $y, $yLabel;
+  $x = svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")");
+  $xLabel = $x.append('text')
+      .attr('x', width)
+      .attr('dy', '-1em')
+      .attr('dx', '-0.2em')
+      .style('text-anchor', 'end');
+  $y = svg.append("g")
+      .attr("class", "y axis");
+  $yLabel = $y.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end");
+
+  function update() {
+    var data = theData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+    x.domain(d3.extent(data, attrgetter(theSXField)));
+    y.domain(d3.extent(data, attrgetter(theYField)));
+
+    $x.call(xAxis);
+    $y.call(yAxis);
+    $xLabel.text(outFields[theSXField]);
+    $yLabel.text(outFields[theYField]);
+
+    svg.selectAll('.dot').data(data)
+      .enter().append('circle')
+      .attr('class', 'dot').attr('r', 2)
+      .attr('cx', function(d) { return x(d[theSXField]); })
+      .attr('cy', function(d) { return y(d[theYField]); })
+      .style('fill', function (d) { return algorithms[d.algorithm]; });
+  }
+
+  dispatch.on('load.scatterplot', update);
 })();
 
 // vi: se sw=2 ts=2 sts=2:
