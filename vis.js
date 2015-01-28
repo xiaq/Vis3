@@ -459,6 +459,13 @@ function fieldsfmt(d, x, y, x2) {
     g.append('path')
         .attr('d', arc)
         .style('fill', function(d) { return d.data.color; });
+    g.append('text')
+        .attr('transform', function(d) { return 'translate(' + arc.centroid(d) + ')'; })
+        .attr('dy', '.35em')
+        .style('text-anchor', 'middle')
+        .text(function(d) {
+          return d.endAngle - d.startAngle > 0.5 ? Math.round(d.value) + 's' : '';
+        });
   }
 
   dispatch.on('load.piechart', update);
