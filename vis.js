@@ -35,15 +35,25 @@ d3.keys(outFields).forEach(function(f) { allFields[f] = outFields[f]; });
 var dispatch = d3.dispatch(
     'load',
     'xswitch', 'xfilter', 'yswitch',
-    'algchange', 'algmouseover', 'algmouseout', 'algclear');
+    'algchange', 'algmouseover', 'algmouseout');
 
-var theWholeData, theData;
+var theWholeData, theData, theAlgData;
 var theXField = 'nvertices', theSXField = 'weight', theYField = 'nedges';
 var theOtherIn = 't', theOtherInValue;
 var theAlgorithms = d3.set();
 
 function updateTheData() {
   theData = theWholeData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
+}
+
+function updateTheAlgData() {
+  if (theAlgorithms.empty() || theAlgorithms.size() == algorithms.length) {
+    theAlgData = theData;
+  } else {
+    theAlgData = theData.filter(function(d) {
+      return theAlgorithms.has(d.algorithm);
+    });
+  }
 }
 
 d3.csv("data.csv", function(error, data) {
@@ -57,6 +67,7 @@ d3.csv("data.csv", function(error, data) {
   inValues.nvertices = inValues.nvertices.values().sort(numcmp);
   theOtherInValue = inValues[theOtherIn][0];
   updateTheData();
+  updateTheAlgData();
   dispatch.load();
 });
 
@@ -92,6 +103,7 @@ d3.csv("data.csv", function(error, data) {
           d3.select(this).select('rect').attr('fill', 'black');
           theAlgorithms.add(d);
         }
+        updateTheAlgData();
         dispatch.algchange();
       })
       .on('mouseover', dispatch.algmouseover)
@@ -117,10 +129,6 @@ d3.csv("data.csv", function(error, data) {
     .attr('y1', lineMargin)
     .attr('x2', lineLength)
     .attr('y2', lineMargin);
-
-  var clear = svg.append('g')
-    .attr('transform', trans)
-    .on('click', dispatch.algclear)
 })();
 
 // y switcher
@@ -216,23 +224,7 @@ d3.csv("data.csv", function(error, data) {
   dispatch.on('xfilter.linechart', update);
   dispatch.on('xswitch.linechart', update);
   dispatch.on('yswitch.linechart', update);
-
-  dispatch.on('algchange.linechart', function(alg) {
-    var data = theData;
-    var algData;
-    if (theAlgorithms.empty() || theAlgorithms.size() == algorithms.length) {
-      algData = data;
-    } else {
-      var algData = data.filter(function(d) {
-        return theAlgorithms.has(d.algorithm);
-      });
-    }
-
-    x.domain(d3.extent(algData, attrgetter(theXField)));
-    y.domain(d3.extent(algData, attrgetter(theYField)));
-
-    draw(data, 'nvertices', 'nedges')
-  });
+  dispatch.on('algchange.linechart', update);
 
   dispatch.on('algmouseover.linechart', function(d) {
     $paths[d].classed('emphasized', true);
@@ -242,20 +234,13 @@ d3.csv("data.csv", function(error, data) {
     $paths[d].classed('emphasized', false);
   });
 
-  dispatch.on('algclear.linechart', update);
-
-  function update() {
-    var data = theData;
-
-    x.domain(d3.extent(data, attrgetter(theXField)));
-    y.domain(d3.extent(data, attrgetter(theYField)));
-
-    draw(data);
-  }
-
   var firstDraw = true, drawDuration = 500;
 
-  function draw(data) {
+  function update() {
+    x.domain(d3.extent(theAlgData, attrgetter(theXField)));
+    y.domain(d3.extent(theAlgData, attrgetter(theYField)));
+
+    var data = theData;
     $x.call(xAxis);
     $y.call(yAxis);
 
