@@ -265,6 +265,9 @@ function second(n) {
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+  var ctm = svg[0][0].getScreenCTM();
+  console.log(ctm, ctm.translate(0, 0));
+
   var $x, $xLabel, $y, $yLabel, $paths = {};
 
   $x = svg.append("g")
@@ -466,7 +469,12 @@ function second(n) {
 
     g.append('path')
         .attr('d', arc)
-        .style('fill', function(d) { return d.data.color; });
+        .style('fill', function(d) { return d.data.color; })
+        .on('mouseover', function(d) {
+          showTooltip(d.data.algorithm + ': ' + second(d.value));
+        })
+        .on('mouseout', hideTooltip);
+
     g.append('text')
         .attr('transform', function(d) { return 'translate(' + arc.centroid(d) + ')'; })
         .attr('dy', '.35em')
