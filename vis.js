@@ -105,7 +105,12 @@ function fieldsfmt(d, x, y, x2) {
 }
 
 function second(n) {
-  return Math.round(n) + 's';
+  return n.toFixed(6) + 's';
+}
+
+function roundSecond(n) {
+  // A rough approximation of %g.
+  return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : n >= 1 ? 2 : 3) + 's';
 }
 
 // Legend
@@ -266,7 +271,7 @@ function second(n) {
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   var ctm = svg[0][0].getScreenCTM();
-  console.log(ctm, ctm.translate(0, 0));
+  //console.log(ctm, ctm.translate(0, 0));
 
   var $x, $xLabel, $y, $yLabel, $paths = {};
 
@@ -480,7 +485,7 @@ function second(n) {
         .attr('dy', '.35em')
         .style('text-anchor', 'middle')
         .text(function(d) {
-          return d.endAngle - d.startAngle > 0.5 ? second(d.value) : '';
+          return d.endAngle - d.startAngle > 0.7 ? roundSecond(d.value) : '';
         });
   }
 
