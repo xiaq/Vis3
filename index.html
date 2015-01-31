@@ -45,12 +45,17 @@
     padding: 2px;
   }
 
-  #expanded-container, #line-chart-container, #line-chart, #scatter-plot-container {
+  #line-chart-container, #line-chart, #scatter-plot-container {
     float: left;
   }
 
+  #scatter-plot {
+    margin-top: 30px;
+  }
+
   #legend-container {
-    float: right;
+    right: 5px;
+    position: fixed;
   }
 
   #x-switcher, #sx-switcher {
@@ -74,8 +79,8 @@
   </style>
 </head>
 <body>
-  <div id="expanded-container"></div>
   <div id="legend-container">
+    <div><button id="expand">Expand graphs</button></div>
     <div id="legend"></div>
     <div class="clear"></div>
     <div>Running time distribution:</div>
@@ -83,15 +88,11 @@
     <div id="pie-chart"></div>
   </div>
   <div id="scatter-plot-container">
-    <div class="caption">Scatter plot
-      <button id="expand-scatter-plot">expand</button></div>
     <div id="scatter-plot"></div>
     <div id="sx-switcher"></div>
   </div>
   <div id="line-chart-container">
     <div id="y-switcher"></div>
-    <div class="caption">Line chart
-      <button id="expand-line-chart">expand</button></div>
     <div class="clear"></div>
     <div id="line-chart"></div>
     <div class="clear"></div>

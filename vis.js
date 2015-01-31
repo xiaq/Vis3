@@ -35,7 +35,7 @@ d3.keys(outFields).forEach(function(f) { allFields[f] = outFields[f]; });
 var dispatch = d3.dispatch(
     'load',
     'xswitch', 'xfilter', 'yswitch', 'sxswitch',
-    'algchange', 'algmouseover', 'algmouseout');
+    'algchange', 'algmouseover', 'algmouseout', 'expand');
 
 var theWholeData, theData, theAlgData;
 var theXField = 'nvertices', theSXField = 'nedges', theYField = 'nedges';
@@ -114,22 +114,13 @@ function roundSecond(n) {
   return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : n >= 1 ? 2 : 3) + 's';
 }
 
-function expand(selector) {
-  if (theExpanded != '') {
-    shrink();
-  }
-  var ec = d3.select('#expanded-container')[0][0];
-  d3.selectAll(selector + '> div')[0].
-      forEach(function(div) { ec.appendChild(div); });
-  theExpanded = selector;
-}
+var expanded = false;
 
-function shrink() {
-  var c = d3.select(theExpanded)[0][0];
-  d3.selectAll('#expanded-container > div')[0].
-      forEach(function(div) { c.appendChild(div); });
-  theExpanded = '';
-}
+d3.select('#expand').on('click', function() {
+  expanded = !expanded;
+  dispatch.expand(expanded);
+  d3.select(this).text(expanded ? 'Shrink graphs' : 'Expand graphs');
+});
 
 // Legend
 (function() {
@@ -337,19 +328,14 @@ var expandedWidth = 940, expandedHeight = 560;
     $paths[d].classed('emphasized', false);
   });
 
-  d3.select('#expand-line-chart').on('click', function() {
-    var selector = '#line-chart-container';
+  dispatch.on('expand', function(e) {
     var w, h;
-    if (theExpanded == selector) {
-      d3.select(this).text('enlarge');
-      shrink();
-      w = normalWidth;
-      h = normalHeight;
-    } else {
-      d3.select(this).text('shrink');
-      expand('#line-chart-container');
+    if (e) {
       w = expandedWidth;
       h = expandedHeight;
+    } else {
+      w = normalWidth;
+      h = normalHeight;
     }
     var width = w - margin.left - margin.right,
         height = h - margin.top - margin.bottom;
@@ -481,20 +467,16 @@ var expandedWidth = 940, expandedHeight = 560;
         .on('mouseout', hideTooltip);
   }
 
-  d3.select('#expand-scatter-plot').on('click', function() {
-    var selector = '#scatter-plot-container';
+  dispatch.on('expand', function(e) {
     var w, h;
-    if (theExpanded == selector) {
-      d3.select(this).text('enlarge');
-      shrink();
-      w = normalWidth;
-      h = normalHeight;
-    } else {
-      d3.select(this).text('shrink');
-      expand('#scatter-plot-container');
+    if (e) {
       w = expandedWidth;
       h = expandedHeight;
+    } else {
+      w = normalWidth;
+      h = normalHeight;
     }
+
     var width = w - margin.left - margin.right,
         height = h - margin.top - margin.bottom;
     x.range([0, width]);
