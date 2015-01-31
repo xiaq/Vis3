@@ -41,6 +41,7 @@ var theWholeData, theData, theAlgData;
 var theXField = 'nvertices', theSXField = 'nedges', theYField = 'nedges';
 var theOtherIn = 't', theOtherInValue;
 var theAlgorithms = d3.set();
+var theExpanded = '';
 
 function updateTheData() {
   theData = theWholeData.filter(function(d) { return d[theOtherIn] == theOtherInValue });
@@ -111,6 +112,23 @@ function second(n) {
 function roundSecond(n) {
   // A rough approximation of %g.
   return n.toFixed(n >= 100 ? 0 : n >= 10 ? 1 : n >= 1 ? 2 : 3) + 's';
+}
+
+function expand(selector) {
+  if (theExpanded != '') {
+    shrink();
+  }
+  var ec = d3.select('#expanded-container')[0][0];
+  d3.selectAll(selector + '> div')[0].
+      forEach(function(div) { ec.appendChild(div); });
+  theExpanded = selector;
+}
+
+function shrink() {
+  var c = d3.select(theExpanded)[0][0];
+  d3.selectAll('#expanded-container > div')[0].
+      forEach(function(div) { c.appendChild(div); });
+  theExpanded = '';
 }
 
 // Legend
@@ -240,13 +258,15 @@ function roundSecond(n) {
       .text(function(d) { return outFields[d]; });
 })();
 
+var expandedWidth = 940, expandedHeight = 560;
+
 // Line chart
 (function() {
-  var dotR = 1.7, xTicks = 8;
+  var dotR = 1.7, xTicks = 8, normalWidth = 520, normalHeight = 420;
 
   var margin = {top: 20, right: 10, bottom: 20, left: 70},
-      width = 520 - margin.left - margin.right,
-      height = 420 - margin.top - margin.bottom;
+      width = normalWidth - margin.left - margin.right,
+      height = normalHeight - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
       .range([0, width]);
@@ -300,7 +320,7 @@ function roundSecond(n) {
         .attr('style', 'stroke: ' + algorithmColor[alg]);
   });
 
-  dispatch.on('load.linechart', update);
+  dispatch.on('load.linechart', function() { update(true); });
   dispatch.on('xfilter.linechart', update);
   dispatch.on('xswitch.linechart', update);
   dispatch.on('yswitch.linechart', update);
@@ -314,9 +334,36 @@ function roundSecond(n) {
     $paths[d].classed('emphasized', false);
   });
 
-  var firstDraw = true, drawDuration = 500;
+  d3.select('#expand-line-chart').on('click', function() {
+    var selector = '#line-chart-container';
+    var w, h;
+    if (theExpanded == selector) {
+      d3.select(this).text('enlarge');
+      shrink();
+      w = normalWidth;
+      h = normalHeight;
+    } else {
+      d3.select(this).text('shrink');
+      expand('#line-chart-container');
+      w = expandedWidth;
+      h = expandedHeight;
+    }
+    var width = w - margin.left - margin.right,
+        height = h - margin.top - margin.bottom;
+    x.range([0, width]);
+    y.range([height, 0]);
+    xAxis.scale(x);
+    yAxis.scale(y);
+    $x.attr("transform", "translate(0," + height + ")");
+    d3.select('#line-chart > svg')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+    update(true);
+  });
 
-  function update() {
+  var drawDuration = 500;
+
+  function update(noamination) {
     x.domain(d3.extent(theAlgData, attrgetter(theXField)));
     y.domain(d3.extent(theAlgData, attrgetter(theYField)));
 
@@ -338,7 +385,7 @@ function roundSecond(n) {
           .datum(datum)
           .classed('faded', faded)
           .transition()
-          .duration(drawDuration)
+          .duration(noamination ? 0 : drawDuration)
           .attr('d', line);
     });
 
@@ -354,18 +401,18 @@ function roundSecond(n) {
           showTooltip(fieldsfmt(d, theXField, theYField, theSXField));
         })
         .on('mouseout', hideTooltip);
-    }, firstDraw ? 0 : drawDuration);
-    firstDraw = false;
+    }, noamination ? 0 : drawDuration);
   }
 })();
 
 // Scatter plot
 (function() {
   var normalR = 1.7, emphasizedR = 2.6, xTicks = 8;
+  var normalWidth = 420, normalHeight = 420;
 
   var margin = {top: 20, right: 20, bottom: 20, left: 70},
-      width = 420 - margin.left - margin.right,
-      height = 420 - margin.top - margin.bottom;
+      width = normalWidth - margin.left - margin.right,
+      height = normalHeight - margin.top - margin.bottom;
 
   var x = d3.scale.linear()
       .range([0, width]);
@@ -430,6 +477,33 @@ function roundSecond(n) {
         })
         .on('mouseout', hideTooltip);
   }
+
+  d3.select('#expand-scatter-plot').on('click', function() {
+    var selector = '#scatter-plot-container';
+    var w, h;
+    if (theExpanded == selector) {
+      d3.select(this).text('enlarge');
+      shrink();
+      w = normalWidth;
+      h = normalHeight;
+    } else {
+      d3.select(this).text('shrink');
+      expand('#scatter-plot-container');
+      w = expandedWidth;
+      h = expandedHeight;
+    }
+    var width = w - margin.left - margin.right,
+        height = h - margin.top - margin.bottom;
+    x.range([0, width]);
+    y.range([height, 0]);
+    xAxis.scale(x);
+    yAxis.scale(y);
+    $x.attr("transform", "translate(0," + height + ")");
+    d3.select('#scatter-plot > svg')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom);
+    update();
+  });
 
   dispatch.on('load.scatterplot', update);
   dispatch.on('yswitch.scatterplot', update);

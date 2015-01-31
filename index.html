@@ -45,8 +45,12 @@
     padding: 2px;
   }
 
-  #legend-container, #line-chart-container, #line-chart, #scatter-plot-container {
+  #expanded-container, #line-chart-container, #line-chart, #scatter-plot-container {
     float: left;
+  }
+
+  #legend-container {
+    float: right;
   }
 
   #x-switcher, #sx-switcher {
@@ -55,10 +59,13 @@
 
   #y-switcher {
     height: 30px;
+    float: left;
   }
 
-  #scatter-plot {
-    margin-top: 30px;
+  .caption {
+    height: 30px;
+    float: left;
+    margin-left: 100px;
   }
 
   .clear {
@@ -67,23 +74,28 @@
   </style>
 </head>
 <body>
-  <div id="scatter-plot-container">
-    <div id="scatter-plot"></div>
-    <div id="sx-switcher"></div>
-  </div>
-  <div id="line-chart-container">
-    <div id="y-switcher"></div>
-    <div class="clear"></div>
-    <div id="line-chart"></div>
-    <div class="clear"></div>
-    <div id="x-switcher"></div>
-  </div>
+  <div id="expanded-container"></div>
   <div id="legend-container">
     <div id="legend"></div>
     <div class="clear"></div>
     <div>Running time distribution:</div>
     <div><span id="total-time"></span> in total</div>
     <div id="pie-chart"></div>
+  </div>
+  <div id="scatter-plot-container">
+    <div class="caption">Scatter plot
+      <button id="expand-scatter-plot">expand</button></div>
+    <div id="scatter-plot"></div>
+    <div id="sx-switcher"></div>
+  </div>
+  <div id="line-chart-container">
+    <div id="y-switcher"></div>
+    <div class="caption">Line chart
+      <button id="expand-line-chart">expand</button></div>
+    <div class="clear"></div>
+    <div id="line-chart"></div>
+    <div class="clear"></div>
+    <div id="x-switcher"></div>
   </div>
   <script src="d3.v3.js"></script>
   <script src="vis.js"></script>
