@@ -328,7 +328,7 @@ var expandedWidth = 940, expandedHeight = 560;
     $paths[d].classed('emphasized', false);
   });
 
-  dispatch.on('expand', function(e) {
+  dispatch.on('expand.linechart', function(e) {
     var w, h;
     if (e) {
       w = expandedWidth;
@@ -467,7 +467,7 @@ var expandedWidth = 940, expandedHeight = 560;
         .on('mouseout', hideTooltip);
   }
 
-  dispatch.on('expand', function(e) {
+  dispatch.on('expand.scatterplot', function(e) {
     var w, h;
     if (e) {
       w = expandedWidth;
