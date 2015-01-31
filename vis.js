@@ -242,6 +242,8 @@ function roundSecond(n) {
 
 // Line chart
 (function() {
+  var dotR = 1.7;
+
   var margin = {top: 20, right: 10, bottom: 20, left: 70},
       width = 520 - margin.left - margin.right,
       height = 420 - margin.top - margin.bottom;
@@ -342,7 +344,7 @@ function roundSecond(n) {
     setTimeout(function() {
       svg.selectAll('.dot').data(data)
         .enter().append('circle')
-        .attr('class', 'dot').attr('r', 1.7)
+        .attr('class', 'dot').attr('r', dotR)
         .attr('cx', function(d) { return x(d[theXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
         .classed('faded', function(d) { return !algs.has(d.algorithm); })
@@ -358,6 +360,8 @@ function roundSecond(n) {
 
 // Scatter plot
 (function() {
+  var normalR = 1.7, emphasizedR = 2.6;
+
   var margin = {top: 20, right: 20, bottom: 20, left: 70},
       width = 420 - margin.left - margin.right,
       height = 420 - margin.top - margin.bottom;
@@ -414,7 +418,7 @@ function roundSecond(n) {
 
     svg.selectAll('.dot').data(theData)
       .enter().append('circle')
-        .attr('class', 'dot').attr('r', 1.7)
+        .attr('class', 'dot').attr('r', normalR)
         .attr('cx', function(d) { return x(d[theSXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
         .classed('faded', function(d) { return !algs.has(d.algorithm); })
@@ -431,6 +435,15 @@ function roundSecond(n) {
   dispatch.on('sxswitch.scatterplot', update);
   dispatch.on('xfilter.scatterplot', update);
   dispatch.on('algchange.scatterplot', update);
+
+  dispatch.on('algmouseover.scatterplot', function(alg) {
+    svg.selectAll('.dot')
+        .attr('r', function(d) {
+          return d.algorithm == alg ? emphasizedR : normalR; });
+  });
+  dispatch.on('algmouseout.scatterplot', function(alg) {
+    svg.selectAll('.dot').attr('r', normalR);
+  });
 })();
 
 // Pie chart
