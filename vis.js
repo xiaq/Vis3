@@ -352,7 +352,11 @@ var expandedWidth = 940, expandedHeight = 560;
 
   var drawDuration = 500;
 
-  function update(noamination) {
+  function update(noanimation) {
+    noanimation = noanimation === true ? true : false;
+
+    console.log('update', noanimation);
+
     x.domain(d3.extent(theAlgData, attrgetter(theXField)));
     y.domain(d3.extent(theAlgData, attrgetter(theYField)));
 
@@ -374,7 +378,7 @@ var expandedWidth = 940, expandedHeight = 560;
           .datum(datum)
           .classed('faded', faded)
           .transition()
-          .duration(noamination ? 0 : drawDuration)
+          .duration(noanimation ? 0 : drawDuration)
           .attr('d', line);
     });
 
@@ -390,7 +394,7 @@ var expandedWidth = 940, expandedHeight = 560;
           showTooltip(fieldsfmt(d, theXField, theYField, theSXField));
         })
         .on('mouseout', hideTooltip);
-    }, noamination ? 0 : drawDuration);
+    }, noanimation ? 0 : drawDuration);
   }
 })();
 
