@@ -221,7 +221,7 @@ function shrink() {
     d3.select('#x-switcher').selectAll('div').remove();
     var switcher = d3.select('#x-switcher').append('div');
 
-    switcher.append('span').text('(filter: ' + inFields[xname] + ' =');
+    switcher.append('span').text('Filter: ' + inFields[xname] + ' =');
     var data = theWholeData;
     var options = d3.set(data.map(attrgetter(xname))).values().sort(numcmp);
     switcher.append('select').on('change', function() {
@@ -229,7 +229,6 @@ function shrink() {
         dispatch.xfilter(v); })
       .selectAll('option').data(options).enter().append('option')
       .attr('value', id).text(id);
-    switcher.append('span').text(')');
 
     switcher.append('button').text('⇔').on('click', function() {
       theXField = xname;
@@ -238,7 +237,11 @@ function shrink() {
       updateTheData();
       dispatch.xswitch(xname);
     });
-    switcher.append('span').text(inFields[theXField]);
+    switcher.append('span')
+        .style('width', '140px')
+        .style('text-align', 'right')
+        .style('display', 'inline-block')
+        .text(inFields[theXField]);
   }
 
   dispatch.on('load.xswitcher', update);
