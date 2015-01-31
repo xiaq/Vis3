@@ -242,7 +242,7 @@ function roundSecond(n) {
 
 // Line chart
 (function() {
-  var dotR = 1.7, xTicks = 10;
+  var dotR = 1.7, xTicks = 8;
 
   var margin = {top: 20, right: 10, bottom: 20, left: 70},
       width = 520 - margin.left - margin.right,
