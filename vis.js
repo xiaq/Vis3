@@ -242,7 +242,7 @@ function roundSecond(n) {
 
 // Line chart
 (function() {
-  var dotR = 1.7;
+  var dotR = 1.7, xTicks = 10;
 
   var margin = {top: 20, right: 10, bottom: 20, left: 70},
       width = 520 - margin.left - margin.right,
@@ -256,6 +256,7 @@ function roundSecond(n) {
 
   var xAxis = d3.svg.axis()
       .scale(x)
+      .ticks(xTicks)
       .orient("bottom");
 
   var yAxis = d3.svg.axis()
@@ -360,7 +361,7 @@ function roundSecond(n) {
 
 // Scatter plot
 (function() {
-  var normalR = 1.7, emphasizedR = 2.6;
+  var normalR = 1.7, emphasizedR = 2.6, xTicks = 8;
 
   var margin = {top: 20, right: 20, bottom: 20, left: 70},
       width = 420 - margin.left - margin.right,
@@ -374,6 +375,7 @@ function roundSecond(n) {
 
   var xAxis = d3.svg.axis()
       .scale(x)
+      .ticks(xTicks)
       .orient("bottom");
 
   var yAxis = d3.svg.axis()
