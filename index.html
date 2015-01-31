@@ -17,10 +17,20 @@
   .line {
     fill: none;
     stroke-width: 1px;
+    opacity: 0.8;
   }
 
-  .line.emphasized {
+  .dot {
+    opacity: 0.8;
+  }
+
+  .faded, .dot.faded {
+    opacity: 0.2;
+  }
+
+  .line.emphasized, .line.emphasized.faded {
     stroke-width: 2px;
+    opacity: 1;
   }
 
   .tooltip {

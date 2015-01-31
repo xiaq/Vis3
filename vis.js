@@ -326,10 +326,14 @@ function roundSecond(n) {
 
     svg.selectAll('.dot').remove();
 
+    var algs = theAlgorithms.empty() ? d3.set(algorithms) : theAlgorithms;
+
     algorithms.forEach(function(alg) {
       var datum = data.filter(function(d) { return d.algorithm == alg; });
+      var faded = !algs.has(alg);
       $paths[alg]
           .datum(datum)
+          .classed('faded', faded)
           .transition()
           .duration(drawDuration)
           .attr('d', line);
@@ -338,9 +342,10 @@ function roundSecond(n) {
     setTimeout(function() {
       svg.selectAll('.dot').data(data)
         .enter().append('circle')
-        .attr('class', 'dot').attr('r', 2)
+        .attr('class', 'dot').attr('r', 1.7)
         .attr('cx', function(d) { return x(d[theXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
+        .classed('faded', function(d) { return !algs.has(d.algorithm); })
         .style('fill', function (d) { return algorithmColor[d.algorithm]; })
         .on('mouseover', function(d) {
           showTooltip(fieldsfmt(d, theXField, theYField, theSXField));
@@ -405,11 +410,14 @@ function roundSecond(n) {
 
     svg.selectAll('.dot').remove();
 
+    var algs = theAlgorithms.empty() ? d3.set(algorithms) : theAlgorithms;
+
     svg.selectAll('.dot').data(theData)
       .enter().append('circle')
-        .attr('class', 'dot').attr('r', 2)
+        .attr('class', 'dot').attr('r', 1.7)
         .attr('cx', function(d) { return x(d[theSXField]); })
         .attr('cy', function(d) { return y(d[theYField]); })
+        .classed('faded', function(d) { return !algs.has(d.algorithm); })
         .style('fill', function (d) { return algorithmColor[d.algorithm]; })
         .on('mouseover', function(d) {
           showTooltip(fieldsfmt(d, theSXField, theYField, theXField));
